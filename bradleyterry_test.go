@@ -164,3 +164,26 @@ func TestBradleyTerryFullOrdered(t *testing.T) {
 		})
 	}
 }
+
+func TestBradleyTerryWinProbability(t *testing.T) {
+	bt := New()
+	skills := []*Skill{
+		&Skill{Mu: 25, SigSq: 1},
+		&Skill{Mu: 13, SigSq: 12309},
+		&Skill{Mu: 12, SigSq: 13},
+		&Skill{Mu: 5.123, SigSq: 0.45},
+	}
+	teamA := createTeam(skills[0:2])
+	teamB := createTeam(skills[2:])
+	probA := bt.WinProbability(teamA.Players, teamB.Players)
+	probB := bt.WinProbability(teamB.Players, teamA.Players)
+	expectedA := 0.546812000714658
+	expectedB := 0.45318799928534204
+	if probA != expectedA {
+		t.Fatalf("got: %v, want: %v", probA, expectedA)
+	}
+	if probB != expectedB {
+		t.Fatalf("got: %v, want: %v", probB, expectedB)
+	}
+
+}

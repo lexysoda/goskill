@@ -102,3 +102,9 @@ func (bt BradleyTerryFull) Skill() Skill {
 		SigSq: bt.Sigma * bt.Sigma,
 	}
 }
+
+func (bt BradleyTerryFull) WinProbability(a, b []*Skill) float64 {
+	teamA := createTeam(a)
+	teamB := createTeam(b)
+	return bt.piq(teamA.S, teamB.S, bt.ciq(teamA.S, teamB.S))
+}

@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-type BradleyTerryFull struct {
+type BTFull struct {
 	Mu    float64
 	Sigma float64
 	Beta  float64
@@ -21,15 +21,15 @@ type team struct {
 	S       Skill
 }
 
-func (bt BradleyTerryFull) ciq(i, q Skill) float64 {
+func (bt BTFull) ciq(i, q Skill) float64 {
 	return math.Sqrt(i.SigSq + q.SigSq + 2*bt.Beta*bt.Beta)
 }
 
-func (bt BradleyTerryFull) piq(i, q Skill, ciq float64) float64 {
+func (bt BTFull) piq(i, q Skill, ciq float64) float64 {
 	return 1 / (1 + math.Exp((q.Mu-i.Mu)/ciq))
 }
 
-func (bt BradleyTerryFull) rank(teams []team, ranks []int) {
+func (bt BTFull) rank(teams []team, ranks []int) {
 	for i, ti := range teams {
 		var omega float64
 		var delta float64
@@ -67,8 +67,8 @@ func createTeam(skills []*Skill) team {
 	return t
 }
 
-func New() BradleyTerryFull {
-	return BradleyTerryFull{
+func New() BTFull {
+	return BTFull{
 		Mu:    25,
 		Sigma: 25. / 3,
 		Beta:  25. / 3 / 2,
@@ -76,7 +76,7 @@ func New() BradleyTerryFull {
 	}
 }
 
-func (bt BradleyTerryFull) Rank(skills [][]*Skill) {
+func (bt BTFull) Rank(skills [][]*Skill) {
 	teams := []team{}
 	ranks := []int{}
 	for i, t := range skills {
@@ -87,7 +87,7 @@ func (bt BradleyTerryFull) Rank(skills [][]*Skill) {
 	return
 }
 
-func (bt BradleyTerryFull) RankOrdered(skills [][]*Skill, ranks []int) {
+func (bt BTFull) RankOrdered(skills [][]*Skill, ranks []int) {
 	teams := []team{}
 	for _, t := range skills {
 		teams = append(teams, createTeam(t))
@@ -96,14 +96,14 @@ func (bt BradleyTerryFull) RankOrdered(skills [][]*Skill, ranks []int) {
 	return
 }
 
-func (bt BradleyTerryFull) Skill() Skill {
+func (bt BTFull) Skill() Skill {
 	return Skill{
 		Mu:    bt.Mu,
 		SigSq: bt.Sigma * bt.Sigma,
 	}
 }
 
-func (bt BradleyTerryFull) WinProbability(a, b []*Skill) float64 {
+func (bt BTFull) WinProbability(a, b []*Skill) float64 {
 	teamA := createTeam(a)
 	teamB := createTeam(b)
 	return bt.piq(teamA.S, teamB.S, bt.ciq(teamA.S, teamB.S))

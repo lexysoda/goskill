@@ -7,7 +7,7 @@ import (
 
 func TestBTFDefaults(t *testing.T) {
 	got := New()
-	expected := BradleyTerryFull{
+	expected := BTFull{
 		Mu:    25,
 		Sigma: (25. / 3),
 		Beta:  (25. / 3) / 2,

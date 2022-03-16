@@ -5,6 +5,14 @@ import (
 	"testing"
 )
 
+type testSkiller struct {
+	s *Skill
+}
+
+func (t testSkiller) Skill() *Skill {
+	return t.s
+}
+
 func TestBTFDefaults(t *testing.T) {
 	got := New()
 	expected := BTFull{
@@ -34,6 +42,10 @@ func TestCreateTeams(t *testing.T) {
 		&Skill{Mu: 25, SigSq: 1},
 		&Skill{Mu: 13, SigSq: 12309},
 	}
+	skillers := []Skiller{
+		testSkiller{skills[0]},
+		testSkiller{skills[1]},
+	}
 	expected := team{
 		Players: skills,
 		S: Skill{
@@ -41,7 +53,7 @@ func TestCreateTeams(t *testing.T) {
 			SigSq: 12310,
 		},
 	}
-	got := createTeam(skills)
+	got := createTeam(skillers)
 	if !reflect.DeepEqual(expected, got) {
 		t.Fatalf("got: %v, want: %v", got, expected)
 	}
@@ -85,11 +97,11 @@ func TestBradleyTerryFull(t *testing.T) {
 	bt := New()
 	for name, test := range BTFTests {
 		t.Run(name, func(t *testing.T) {
-			teams := [][]*Skill{}
+			teams := [][]Skiller{}
 			for _, t := range test.in {
-				team := []*Skill{}
+				team := []Skiller{}
 				for i, _ := range t {
-					team = append(team, &t[i])
+					team = append(team, testSkiller{&t[i]})
 				}
 				teams = append(teams, team)
 			}
@@ -149,11 +161,11 @@ func TestBradleyTerryFullOrdered(t *testing.T) {
 	bt := New()
 	for name, test := range BTFOrderedTests {
 		t.Run(name, func(t *testing.T) {
-			teams := [][]*Skill{}
+			teams := [][]Skiller{}
 			for _, t := range test.skills {
-				team := []*Skill{}
+				team := []Skiller{}
 				for i, _ := range t {
-					team = append(team, &t[i])
+					team = append(team, testSkiller{&t[i]})
 				}
 				teams = append(teams, team)
 			}
@@ -173,10 +185,10 @@ func TestBradleyTerryWinProbability(t *testing.T) {
 		&Skill{Mu: 12, SigSq: 13},
 		&Skill{Mu: 5.123, SigSq: 0.45},
 	}
-	teamA := createTeam(skills[0:2])
-	teamB := createTeam(skills[2:])
-	probA := bt.WinProbability(teamA.Players, teamB.Players)
-	probB := bt.WinProbability(teamB.Players, teamA.Players)
+	teamA := []Skiller{testSkiller{skills[0]}, testSkiller{skills[1]}}
+	teamB := []Skiller{testSkiller{skills[2]}, testSkiller{skills[3]}}
+	probA := bt.WinProbability(teamA, teamB)
+	probB := bt.WinProbability(teamB, teamA)
 	expectedA := 0.546812000714658
 	expectedB := 0.45318799928534204
 	if probA != expectedA {

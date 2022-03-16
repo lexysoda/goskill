@@ -16,6 +16,10 @@ type Skill struct {
 	SigSq float64
 }
 
+type Skiller interface {
+	Skill() *Skill
+}
+
 type team struct {
 	Players []*Skill
 	S       Skill
@@ -58,11 +62,13 @@ func (bt BTFull) rank(teams []team, ranks []int) {
 	return
 }
 
-func createTeam(skills []*Skill) team {
-	t := team{Players: skills}
-	for _, s := range skills {
-		t.S.Mu += s.Mu
-		t.S.SigSq += s.SigSq
+func createTeam(skillers []Skiller) team {
+	t := team{Players: []*Skill{}}
+	for _, s := range skillers {
+		skill := s.Skill()
+		t.Players = append(t.Players, skill)
+		t.S.Mu += skill.Mu
+		t.S.SigSq += skill.SigSq
 	}
 	return t
 }
@@ -76,10 +82,10 @@ func New() BTFull {
 	}
 }
 
-func (bt BTFull) Rank(skills [][]*Skill) {
+func (bt BTFull) Rank(skillers [][]Skiller) {
 	teams := []team{}
 	ranks := []int{}
-	for i, t := range skills {
+	for i, t := range skillers {
 		teams = append(teams, createTeam(t))
 		ranks = append(ranks, i)
 	}
@@ -87,9 +93,9 @@ func (bt BTFull) Rank(skills [][]*Skill) {
 	return
 }
 
-func (bt BTFull) RankOrdered(skills [][]*Skill, ranks []int) {
+func (bt BTFull) RankOrdered(skillers [][]Skiller, ranks []int) {
 	teams := []team{}
-	for _, t := range skills {
+	for _, t := range skillers {
 		teams = append(teams, createTeam(t))
 	}
 	bt.rank(teams, ranks)
@@ -103,7 +109,7 @@ func (bt BTFull) Skill() Skill {
 	}
 }
 
-func (bt BTFull) WinProbability(a, b []*Skill) float64 {
+func (bt BTFull) WinProbability(a, b []Skiller) float64 {
 	teamA := createTeam(a)
 	teamB := createTeam(b)
 	return bt.piq(teamA.S, teamB.S, bt.ciq(teamA.S, teamB.S))
